@@ -162,7 +162,7 @@ export const Editable = (props: EditableProps) => {
     domSelection.removeAllRanges()
 
     if (newDomRange) {
-      const isBackward = Range.isBackward(selection);
+      const isBackward = !!selection && Range.isBackward(selection);
       const clonedRange = newDomRange.cloneRange();
       if (isBackward) { clonedRange.collapse(false); }
       domSelection.addRange(clonedRange);
