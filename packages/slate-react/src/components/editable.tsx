@@ -162,7 +162,15 @@ export const Editable = (props: EditableProps) => {
     domSelection.removeAllRanges()
 
     if (newDomRange) {
-      domSelection.addRange(newDomRange!)
+      const isBackward = Range.isBackward(selection);
+      const clonedRange = newDomRange.cloneRange();
+      if (isBackward) { clonedRange.collapse(false); }
+      domSelection.addRange(clonedRange);
+      if (isBackward) {
+        domSelection.extend(newDomRange.startContainer, newDomRange.startOffset);
+      } else {
+        domSelection.extend(newDomRange.endContainer, newDomRange.endOffset);
+      }
       const leafEl = newDomRange.startContainer.parentElement!
       scrollIntoView(leafEl, { scrollMode: 'if-needed' })
     }
@@ -373,7 +381,25 @@ export const Editable = (props: EditableProps) => {
           hasEditableTarget(editor, domRange.startContainer) &&
           hasEditableTarget(editor, domRange.endContainer)
         ) {
-          const range = ReactEditor.toSlateRange(editor, domRange)
+          let range;
+          if (domSelection && (
+            (
+              domSelection.anchorNode === domRange.startContainer &&
+              domSelection.anchorOffset === domRange.startOffset &&
+              domSelection.focusNode === domRange.endContainer &&
+              domSelection.focusOffset === domRange.endOffset
+            ) ||
+            (
+              domSelection.anchorNode === domRange.endContainer &&
+              domSelection.anchorOffset === domRange.endOffset &&
+              domSelection.focusNode === domRange.startContainer &&
+              domSelection.focusOffset === domRange.startOffset
+            )
+          )) {
+            range = ReactEditor.toSlateRange(editor, domSelection);
+          } else {
+            range = ReactEditor.toSlateRange(editor, domRange);
+          }
           Transforms.select(editor, range)
         } else {
           Transforms.deselect(editor)
