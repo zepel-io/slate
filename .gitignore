@@ -2,7 +2,7 @@
 .next/
 .vscode/
 build/
-dist/
+# dist/
 lib/
 node_modules/
 packages/*/yarn.lock
